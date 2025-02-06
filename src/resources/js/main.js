@@ -43,6 +43,7 @@ import '@pixi/canvas-display';
 import { PikachuVolleyball } from './pikavolley.js';
 import { ASSETS_PATH } from './assets_path.js';
 import { setUpUI } from './ui.js';
+import { setUpRetroCanvasUI } from './retro_canvas_ui.js';
 
 // Reference for how to use Renderer.registerPlugin:
 // https://github.com/pixijs/pixijs/blob/af3c0c6bb15aeb1049178c972e4a14bb4cabfce4/bundles/pixi.js/src/index.ts#L27-L34
@@ -149,139 +150,9 @@ function setUpInitialUI() {
  */
 function setup() {
   const pikaVolley = new PikachuVolleyball(stage, loader.resources);
-  movePageControlsIntoGameCanvas();
   setUpUI(pikaVolley, ticker);
-  setUpModeAndControlUI(pikaVolley);
-  const menuHints = document.getElementById('retro-menu-hints');
-  ticker.add(() => {
-    const showMenuHints = pikaVolley.state === pikaVolley.menu && pikaVolley.frameCounter > 70;
-    menuHints.classList.toggle('hidden', !showMenuHints);
-  });
+  setUpRetroCanvasUI(pikaVolley, ticker);
   start(pikaVolley);
-}
-
-function movePageControlsIntoGameCanvas() {
-  const gameCanvasContainer = document.getElementById('game-canvas-container');
-  const menuBar = document.getElementById('menu-bar');
-  const settingsOverlay = document.getElementById('retro-settings-overlay');
-
-  gameCanvasContainer.prepend(menuBar);
-  gameCanvasContainer.appendChild(settingsOverlay);
-  menuBar.classList.add('in-game-menu-bar');
-  settingsOverlay.classList.add('in-game-settings-overlay');
-}
-
-function setUpModeAndControlUI(pikaVolley) {
-  const settingsOverlay = document.getElementById('retro-settings-overlay');
-  const gameCanvasContainer = document.getElementById('game-canvas-container');
-  const settingsGrid = document.getElementById('retro-settings-grid');
-  const settingsMessage = document.getElementById('retro-settings-message');
-  const settingsBtn = document.getElementById('retro-key-settings-btn');
-  const closeSettingsBtn = document.getElementById('retro-close-settings-btn');
-  const resetSettingsBtn = document.getElementById('retro-reset-settings-btn');
-  let capture = null;
-
-  const labels = {
-    ArrowLeft: '←',
-    ArrowRight: '→',
-    ArrowUp: '↑',
-    ArrowDown: '↓',
-    ShiftLeft: 'L Shift',
-    ShiftRight: 'R Shift',
-    Enter: 'Enter',
-    Space: 'Space',
-  };
-  const actionLabels = {
-    left: '왼쪽',
-    right: '오른쪽',
-    up: '점프',
-    down: '아래',
-    powerHit: '스매시',
-  };
-  const keyLabel = (code) => labels[code] || code.replace('Key', '').replace('Digit', '');
-  const readBindings = () => pikaVolley.getSavedKeyboardBindings();
-
-  const renderSettings = () => {
-    const bindings = readBindings();
-    settingsGrid.innerHTML = ['player1', 'player2']
-      .map((player) => {
-        const title = player === 'player1' ? 'Player 1' : 'Player 2';
-        const buttons = Object.entries(bindings[player])
-          .map(
-            ([action, code]) => `
-              <button class="retro-key-bind" type="button" data-player="${player}" data-action="${action}">
-                <span>${actionLabels[action]}</span>
-                <kbd>${keyLabel(code)}</kbd>
-              </button>
-            `
-          )
-          .join('');
-        return `<section class="retro-key-column"><h3>${title}</h3>${buttons}</section>`;
-      })
-      .join('');
-
-    settingsGrid.querySelectorAll('.retro-key-bind').forEach((button) => {
-      button.addEventListener('click', () => {
-        capture = { player: button.dataset.player, action: button.dataset.action };
-        settingsMessage.textContent = `${button.querySelector('span').textContent}에 사용할 키를 누르세요.`;
-        button.classList.add('capturing');
-      });
-    });
-  };
-
-  document.querySelectorAll('[data-retro-mode]').forEach((button) => {
-    button.addEventListener('click', () => {
-      pikaVolley.startSelectedMode(button.dataset.retroMode);
-    });
-  });
-
-  settingsBtn.addEventListener('click', () => {
-    pikaVolley.paused = true;
-    settingsMessage.textContent = '바꾸고 싶은 조작을 클릭한 뒤 새 키를 누르세요.';
-    renderSettings();
-    settingsOverlay.classList.remove('hidden');
-  });
-
-  closeSettingsBtn.addEventListener('click', () => {
-    capture = null;
-    settingsOverlay.classList.add('hidden');
-    pikaVolley.paused = false;
-  });
-
-  resetSettingsBtn.addEventListener('click', () => {
-    const defaults = pikaVolley.getDefaultKeyboardBindings();
-    localStorage.setItem('pikachu-volleyball-controls-v1', JSON.stringify(defaults));
-    pikaVolley.setKeyboardBindings(defaults);
-    settingsMessage.textContent = '기본 키 배치로 복원했습니다.';
-    renderSettings();
-  });
-
-  window.addEventListener(
-    'keydown',
-    (event) => {
-      if (!capture) return;
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      const bindings = readBindings();
-      const duplicate = Object.entries(bindings).some(([player, playerBindings]) =>
-        Object.entries(playerBindings).some(
-          ([action, code]) =>
-            code === event.code && !(player === capture.player && action === capture.action)
-        )
-      );
-      if (duplicate) {
-        settingsMessage.textContent = `${keyLabel(event.code)} 키는 이미 다른 조작에 사용 중입니다.`;
-        return;
-      }
-      bindings[capture.player][capture.action] = event.code;
-      localStorage.setItem('pikachu-volleyball-controls-v1', JSON.stringify(bindings));
-      pikaVolley.setKeyboardBindings(bindings);
-      settingsMessage.textContent = `${actionLabels[capture.action]} 키를 ${keyLabel(event.code)}로 변경했습니다.`;
-      capture = null;
-      renderSettings();
-    },
-    true
-  );
 }
 
 /**

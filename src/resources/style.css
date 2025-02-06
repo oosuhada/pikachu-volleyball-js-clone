@@ -131,6 +131,19 @@
   transform: translateX(-50%);
 }
 
+#retro-ui-canvas {
+  position: absolute;
+  z-index: 40;
+  top: 50%;
+  left: 50%;
+  width: var(--canvas-width);
+  height: var(--canvas-height);
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+}
+
 .retro-panel {
   width: min(calc(var(--canvas-width) * 0.72), 560px);
   max-height: calc(var(--canvas-height) - calc(var(--font-size) * 1.2));
