@@ -15,17 +15,17 @@
     <link
       rel="apple-touch-icon"
       sizes="192x192"
-      href="../resources/assets/images/IDI_PIKAICON-1_gap_filled_192.png"
+      href="<%= htmlWebpackPlugin.options.assetPrefix %>resources/assets/images/IDI_PIKAICON-1_gap_filled_192.png"
     />
-    <link rel="manifest" href="./manifest.json" />
+    <link rel="manifest" href="<%= htmlWebpackPlugin.options.manifestPath %>" />
 
     <link
       rel="icon"
       type="image/png"
       sizes="32x32"
-      href="../resources/assets/images/IDI_PIKAICON-0.png"
+      href="<%= htmlWebpackPlugin.options.assetPrefix %>resources/assets/images/IDI_PIKAICON-0.png"
     />
-    <link rel="stylesheet" href="../resources/style.css" />
+    <link rel="stylesheet" href="<%= htmlWebpackPlugin.options.assetPrefix %>resources/style.css" />
   </head>
   <body>
     <div id="flex-container">
@@ -231,7 +231,7 @@
             <div class="align-center-horizontally">
               <img
                 class="screenshot"
-                src="../resources/assets/images/screenshot.png"
+                src="<%= htmlWebpackPlugin.options.assetPrefix %>resources/assets/images/screenshot.png"
                 width="1728"
                 height="1216"
                 alt="Pikachu Volleyball game screenshot"
@@ -241,7 +241,7 @@
             <div class="align-center-horizontally">
               <img
                 class="controls"
-                src="../resources/assets/images/controls_ko.png"
+                src="<%= htmlWebpackPlugin.options.assetPrefix %>resources/assets/images/controls_ko.png"
                 width="1920"
                 height="984"
                 alt="game controls"
@@ -339,7 +339,7 @@
       }
 
       if ('serviceWorker' in navigator) {
-        const wb = new Workbox('../sw.js');
+        const wb = new Workbox('<%= htmlWebpackPlugin.options.serviceWorkerPath %>');
         // Add an event listener to detect when the registered
         // service worker has installed but is waiting to activate.
         wb.addEventListener('waiting', (event) => {

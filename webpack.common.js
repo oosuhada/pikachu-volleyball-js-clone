@@ -34,8 +34,26 @@ module.exports = {
         { from: 'src/ko/manifest.json', to: 'ko/manifest.json' },
         { from: 'src/zh/manifest.json', to: 'zh/manifest.json' },
         { from: 'src/resources/style.css', to: 'resources/style.css' },
-        { from: 'src/index.html', to: 'index.html' },
       ],
+    }),
+    new HtmlWebpackPlugin({
+      template: 'src/ko/index.html',
+      filename: 'index.html',
+      assetPrefix: './',
+      manifestPath: './ko/manifest.json',
+      serviceWorkerPath: './sw.js',
+      chunks: [
+        'runtime',
+        'ko',
+        'main',
+        'dark_color_scheme',
+        'is_embedded_in_other_website',
+      ],
+      chunksSortMode: 'manual',
+      minify: {
+        collapseWhitespace: true,
+        removeComments: true,
+      },
     }),
     new HtmlWebpackPlugin({
       template: 'src/en/index.html',
@@ -55,6 +73,9 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: 'src/ko/index.html',
       filename: 'ko/index.html',
+      assetPrefix: '../',
+      manifestPath: './manifest.json',
+      serviceWorkerPath: '../sw.js',
       chunks: [
         'runtime',
         'ko',
