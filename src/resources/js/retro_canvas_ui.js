@@ -36,9 +36,7 @@ export function setUpRetroCanvasUI(pikaVolley, ticker) {
   const container = document.getElementById('game-canvas-container');
   const gameCanvas = document.getElementById('game-canvas');
   const legacyMenu = document.getElementById('menu-bar');
-  const legacySettings = document.getElementById('retro-settings-overlay');
   legacyMenu.classList.add('hidden');
-  legacySettings.classList.add('hidden');
 
   const uiCanvas = document.createElement('canvas');
   uiCanvas.id = 'retro-ui-canvas';
@@ -142,10 +140,10 @@ export function setUpRetroCanvasUI(pikaVolley, ticker) {
         ctx.fillStyle = '#fff36b';
         ctx.fillRect(x - 8, y - 4, 152, 18);
       }
-      pixelText(col === 0 && localIndex === 0 ? '1P' : col === 1 && localIndex === 0 ? '2P' : '', x, 69, 9, '#66b9ff');
+      pixelText(col === 0 && localIndex === 0 ? '1 PLAYER' : col === 1 && localIndex === 0 ? '2 PLAYER' : '', x, 69, 9, col === 0 ? '#fff36b' : '#ffffff');
       pixelText(`${ACTION_LABELS[item.action]}  ${labelKey(item.code)}`, x, y, 8, row === index ? '#111111' : '#ffffff');
     });
-    pixelText(capture ? 'PRESS NEW KEY...' : 'ENTER: CHANGE  ·  R: DEFAULT', 216, 229, 8, capture ? '#ff7f55' : '#d7d7d7', 'center');
+    pixelText(capture ? 'PRESS NEW KEY...' : 'Z/ENTER CHANGE  ·  R DEFAULT', 216, 229, 8, capture ? '#ff7f55' : '#d7d7d7', 'center');
     if (message) pixelText(message, 216, 245, 7, '#fff36b', 'center');
   }
 
