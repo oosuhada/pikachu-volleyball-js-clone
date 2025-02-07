@@ -32,6 +32,7 @@ module.exports = {
         },
         { from: 'src/en/manifest.json', to: 'en/manifest.json' },
         { from: 'src/ko/manifest.json', to: 'ko/manifest.json' },
+        { from: 'src/ko/manifest.json', to: 'manifest.json' },
         { from: 'src/zh/manifest.json', to: 'zh/manifest.json' },
         { from: 'src/resources/style.css', to: 'resources/style.css' },
       ],
@@ -40,7 +41,7 @@ module.exports = {
       template: 'src/ko/index.html',
       filename: 'index.html',
       assetPrefix: './',
-      manifestPath: './ko/manifest.json',
+      manifestPath: './manifest.json',
       serviceWorkerPath: './sw.js',
       chunks: [
         'runtime',
