@@ -91,6 +91,17 @@ for (const prop in ASSETS_PATH.SOUNDS) {
 
 setUpInitialUI();
 
+// This project now uses a single canonical root page and a canvas-only UI.
+// Remove old service workers/caches that may still serve the previous HTML UI.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((registration) => registration.unregister());
+  });
+}
+if ('caches' in window) {
+  caches.keys().then((keys) => Promise.all(keys.map((key) => caches.delete(key))));
+}
+
 /**
  * Set up the initial UI.
  */

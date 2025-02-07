@@ -620,6 +620,33 @@ span.check {
 span.hidden {
   display: none;
 }
+
+/*
+ * Legacy DOM controls are kept only as invisible command targets for ui.js.
+ * All visible game controls are rendered by retro_canvas_ui.js directly over
+ * the 432x304 game canvas so the page never exposes modern web UI chrome.
+ */
+body #menu-bar,
+body #retro-settings-overlay,
+body #retro-menu-hints,
+body #about-box,
+body .if-embedded-in-other-website {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+#flex-container {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+#game-canvas-container {
+  width: var(--canvas-width);
+  height: var(--canvas-height);
+  margin: 0 auto;
+  overflow: hidden;
+}
 #about-box-head {
   display: flex;
   flex-wrap: wrap;
