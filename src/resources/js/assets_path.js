@@ -3,8 +3,12 @@
  */
 'use strict';
 
+const DEPLOY_BASE = window.location.pathname.startsWith('/pikachu')
+  ? '/pikachu/'
+  : '../';
+
 export const ASSETS_PATH = {
-  SPRITE_SHEET: '../resources/assets/images/sprite_sheet.json',
+  SPRITE_SHEET: `${DEPLOY_BASE}resources/assets/images/sprite_sheet.json`,
   TEXTURES: {},
   SOUNDS: {},
 };
@@ -46,11 +50,11 @@ TEXTURES.GAME_START = 'messages/ja/game_start.png';
 TEXTURES.SITTING_PIKACHU = 'sitting_pikachu.png';
 
 const SOUNDS = ASSETS_PATH.SOUNDS;
-SOUNDS.BGM = '../resources/assets/sounds/bgm.mp3';
-SOUNDS.PIPIKACHU = '../resources/assets/sounds/WAVE140_1.wav';
-SOUNDS.PIKA = '../resources/assets/sounds/WAVE141_1.wav';
-SOUNDS.CHU = '../resources/assets/sounds/WAVE142_1.wav';
-SOUNDS.PI = '../resources/assets/sounds/WAVE143_1.wav';
-SOUNDS.PIKACHU = '../resources/assets/sounds/WAVE144_1.wav';
-SOUNDS.POWERHIT = '../resources/assets/sounds/WAVE145_1.wav';
-SOUNDS.BALLTOUCHESGROUND = '../resources/assets/sounds/WAVE146_1.wav';
+SOUNDS.BGM = `${DEPLOY_BASE}resources/assets/sounds/bgm.mp3`;
+SOUNDS.PIPIKACHU = `${DEPLOY_BASE}resources/assets/sounds/WAVE140_1.wav`;
+SOUNDS.PIKA = `${DEPLOY_BASE}resources/assets/sounds/WAVE141_1.wav`;
+SOUNDS.CHU = `${DEPLOY_BASE}resources/assets/sounds/WAVE142_1.wav`;
+SOUNDS.PI = `${DEPLOY_BASE}resources/assets/sounds/WAVE143_1.wav`;
+SOUNDS.PIKACHU = `${DEPLOY_BASE}resources/assets/sounds/WAVE144_1.wav`;
+SOUNDS.POWERHIT = `${DEPLOY_BASE}resources/assets/sounds/WAVE145_1.wav`;
+SOUNDS.BALLTOUCHESGROUND = `${DEPLOY_BASE}resources/assets/sounds/WAVE146_1.wav`;
