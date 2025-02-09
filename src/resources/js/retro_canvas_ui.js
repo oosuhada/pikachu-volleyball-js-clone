@@ -2,7 +2,6 @@
 
 const WIDTH = 432;
 const HEIGHT = 304;
-const TOP_H = 20;
 
 const ACTION_LABELS = {
   left: 'LEFT',
@@ -21,6 +20,7 @@ const KEY_LABELS = {
   ShiftRight: 'RSHIFT',
   Enter: 'ENTER',
   Space: 'SPACE',
+  Escape: 'ESC',
 };
 
 function labelKey(code) {
@@ -35,14 +35,13 @@ function fitCanvasToGame(uiCanvas, gameCanvas) {
 export function setUpRetroCanvasUI(pikaVolley, ticker) {
   const container = document.getElementById('game-canvas-container');
   const gameCanvas = document.getElementById('game-canvas');
-  const legacyMenu = document.getElementById('menu-bar');
-  legacyMenu.classList.add('hidden');
 
   const uiCanvas = document.createElement('canvas');
   uiCanvas.id = 'retro-ui-canvas';
   uiCanvas.width = WIDTH;
   uiCanvas.height = HEIGHT;
   uiCanvas.tabIndex = 0;
+  uiCanvas.setAttribute('aria-label', 'Pikachu Volleyball game menu');
   container.appendChild(uiCanvas);
   fitCanvasToGame(uiCanvas, gameCanvas);
 
@@ -54,20 +53,15 @@ export function setUpRetroCanvasUI(pikaVolley, ticker) {
   let modeRow = 0;
   let capture = null;
   let message = '';
-  const tabs = [
-    { id: 'game', label: 'GAME', x: 4, w: 54 },
-    { id: 'keys', label: 'KEY', x: 61, w: 50 },
-    { id: 'options', label: 'OPTION', x: 114, w: 64 },
-    { id: 'about', label: 'ABOUT', x: 181, w: 58 },
-  ];
+  let returnPanel = null;
 
   const optionRows = [
-    ['GRAPHIC', ['graphic-sharp-btn', 'graphic-soft-btn']],
-    ['BGM', ['bgm-on-btn', 'bgm-off-btn']],
-    ['SFX', ['stereo-btn', 'mono-btn', 'sfx-off-btn']],
-    ['SPEED', ['slow-speed-btn', 'medium-speed-btn', 'fast-speed-btn']],
-    ['SCORE', ['winning-score-5-btn', 'winning-score-10-btn', 'winning-score-15-btn']],
-    ['PRACTICE', ['practice-mode-on-btn', 'practice-mode-off-btn']],
+    ['GRAPHIC', ['graphic-sharp-btn', 'graphic-soft-btn'], ['SHARP', 'SOFT']],
+    ['BGM', ['bgm-on-btn', 'bgm-off-btn'], ['ON', 'OFF']],
+    ['SFX', ['stereo-btn', 'mono-btn', 'sfx-off-btn'], ['STEREO', 'MONO', 'OFF']],
+    ['SPEED', ['slow-speed-btn', 'medium-speed-btn', 'fast-speed-btn'], ['SLOW', 'NORMAL', 'FAST']],
+    ['SCORE', ['winning-score-5-btn', 'winning-score-10-btn', 'winning-score-15-btn'], ['5', '10', '15']],
+    ['PRACTICE', ['practice-mode-on-btn', 'practice-mode-off-btn'], ['ON', 'OFF']],
   ];
 
   function pixelText(text, x, y, size = 8, color = '#ffffff', align = 'left') {
@@ -82,44 +76,38 @@ export function setUpRetroCanvasUI(pikaVolley, ticker) {
     ctx.restore();
   }
 
-  function drawTopBar() {
-    ctx.fillStyle = 'rgba(0,0,0,0.78)';
-    ctx.fillRect(0, 0, WIDTH, TOP_H);
-    tabs.forEach((tab) => {
-      const active = panel === tab.id;
-      ctx.fillStyle = active ? '#fff36b' : '#141414';
-      ctx.fillRect(tab.x, 3, tab.w, 14);
-      ctx.strokeStyle = active ? '#111111' : '#f4f4f4';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(tab.x + 0.5, 3.5, tab.w - 1, 13);
-      pixelText(tab.label, tab.x + tab.w / 2, 6, 7, active ? '#111111' : '#ffffff', 'center');
-    });
-    pixelText('ESC CLOSE', 425, 6, 7, '#d9d9d9', 'right');
-  }
-
   function panelFrame(title) {
-    ctx.fillStyle = 'rgba(5,12,8,0.9)';
-    ctx.fillRect(34, 38, 364, 228);
-    ctx.strokeStyle = '#fff36b';
+    ctx.fillStyle = '#081008';
+    ctx.fillRect(42, 34, 348, 236);
+    ctx.strokeStyle = '#f4e85c';
     ctx.lineWidth = 2;
-    ctx.strokeRect(34.5, 38.5, 363, 227);
-    ctx.strokeStyle = '#101010';
-    ctx.strokeRect(37.5, 41.5, 357, 221);
-    pixelText(title, 216, 49, 13, '#fff36b', 'center');
+    ctx.strokeRect(42.5, 34.5, 347, 235);
+    ctx.strokeStyle = '#000000';
+    ctx.strokeRect(45.5, 37.5, 341, 229);
+    pixelText(title, 216, 47, 12, '#f4e85c', 'center');
   }
 
-  function drawGamePanel() {
-    panelFrame('GAME MENU');
-    const items = ['RESUME', 'PAUSE / RESUME', 'RESTART'];
+  function drawSelector(items, startY, gap = 28, width = 230) {
     items.forEach((item, index) => {
-      const y = 95 + index * 36;
+      const y = startY + index * gap;
       if (row === index) {
-        ctx.fillStyle = '#fff36b';
-        ctx.fillRect(105, y - 5, 222, 22);
+        ctx.fillStyle = '#f4e85c';
+        ctx.fillRect((WIDTH - width) / 2, y - 4, width, 18);
       }
-      pixelText(`${row === index ? '▶' : ' '} ${item}`, 120, y, 10, row === index ? '#111111' : '#ffffff');
+      pixelText(
+        `${row === index ? '>' : ' '} ${item}`,
+        (WIDTH - width) / 2 + 16,
+        y,
+        9,
+        row === index ? '#081008' : '#ffffff'
+      );
     });
-    pixelText('UP/DOWN SELECT  ·  Z/ENTER OK', 216, 225, 8, '#d7d7d7', 'center');
+  }
+
+  function drawPausePanel() {
+    panelFrame('GAME MENU');
+    drawSelector(['RESUME', 'RESTART', 'KEY SETTING', 'OPTION', 'ABOUT', 'TITLE'], 78, 27, 246);
+    pixelText('UP/DOWN SELECT  Z/ENTER OK', 216, 247, 7, '#cfcfcf', 'center');
   }
 
   function drawKeyPanel() {
@@ -131,103 +119,165 @@ export function setUpRetroCanvasUI(pikaVolley, ticker) {
         flat.push({ player, playerIndex, action, code });
       });
     });
+
+    pixelText('1 PLAYER', 68, 69, 9, '#f4e85c');
+    pixelText('2 PLAYER', 234, 69, 9, '#f4e85c');
+
     flat.forEach((item, index) => {
       const col = item.playerIndex;
       const localIndex = index % 5;
-      const x = col === 0 ? 58 : 222;
-      const y = 88 + localIndex * 27;
+      const x = col === 0 ? 58 : 224;
+      const y = 91 + localIndex * 26;
       if (row === index) {
-        ctx.fillStyle = '#fff36b';
-        ctx.fillRect(x - 8, y - 4, 152, 18);
+        ctx.fillStyle = '#f4e85c';
+        ctx.fillRect(x - 7, y - 4, 154, 18);
       }
-      pixelText(col === 0 && localIndex === 0 ? '1 PLAYER' : col === 1 && localIndex === 0 ? '2 PLAYER' : '', x, 69, 9, col === 0 ? '#fff36b' : '#ffffff');
-      pixelText(`${ACTION_LABELS[item.action]}  ${labelKey(item.code)}`, x, y, 8, row === index ? '#111111' : '#ffffff');
+      pixelText(
+        `${ACTION_LABELS[item.action].padEnd(6, ' ')} ${labelKey(item.code)}`,
+        x,
+        y,
+        8,
+        row === index ? '#081008' : '#ffffff'
+      );
     });
-    pixelText(capture ? 'PRESS NEW KEY...' : 'Z/ENTER CHANGE  ·  R DEFAULT', 216, 229, 8, capture ? '#ff7f55' : '#d7d7d7', 'center');
-    if (message) pixelText(message, 216, 245, 7, '#fff36b', 'center');
+
+    pixelText(capture ? 'PRESS NEW KEY...' : 'Z/ENTER CHANGE  R DEFAULT', 216, 234, 7, capture ? '#ff8a5c' : '#cfcfcf', 'center');
+    pixelText(message || 'ESC BACK', 216, 249, 7, message ? '#f4e85c' : '#cfcfcf', 'center');
   }
 
-  function selectedOptionLabel(ids) {
-    const selected = ids.find((id) => document.getElementById(id)?.classList.contains('selected'));
-    if (!selected) return '-';
-    return document.getElementById(selected).textContent.replace('✓', '').trim().toUpperCase();
+  function selectedOptionLabel(ids, labels) {
+    const selectedIndex = ids.findIndex((id) => document.getElementById(id)?.classList.contains('selected'));
+    return selectedIndex >= 0 ? labels[selectedIndex] : '-';
   }
 
   function drawOptionsPanel() {
     panelFrame('OPTION');
-    optionRows.forEach(([label, ids], index) => {
-      const y = 86 + index * 26;
+    optionRows.forEach(([label, ids, labels], index) => {
+      const y = 79 + index * 27;
       if (row === index) {
-        ctx.fillStyle = '#fff36b';
+        ctx.fillStyle = '#f4e85c';
         ctx.fillRect(74, y - 4, 284, 18);
       }
-      pixelText(`${row === index ? '▶' : ' '} ${label}`, 86, y, 8, row === index ? '#111111' : '#ffffff');
-      pixelText(selectedOptionLabel(ids), 346, y, 8, row === index ? '#111111' : '#fff36b', 'right');
+      pixelText(`${row === index ? '>' : ' '} ${label}`, 86, y, 8, row === index ? '#081008' : '#ffffff');
+      pixelText(selectedOptionLabel(ids, labels), 346, y, 8, row === index ? '#081008' : '#f4e85c', 'right');
     });
-    pixelText('LEFT/RIGHT CHANGE  ·  ESC CLOSE', 216, 235, 8, '#d7d7d7', 'center');
+    pixelText('LEFT/RIGHT CHANGE  ESC BACK', 216, 247, 7, '#cfcfcf', 'center');
   }
 
   function drawAboutPanel() {
     panelFrame('PIKACHU VOLLEYBALL');
     const lines = [
-      'BROWSER RETRO CLONE',
+      '1P VS CPU',
+      '2P LOCAL',
       '',
-      '1P : VS CPU',
-      '2P : LOCAL KEYBOARD',
+      'MOVE / JUMP / SMASH',
+      'KEYS CAN BE CHANGED IN MENU',
       '',
-      'TITLE SCREEN: UP/DOWN + Z/ENTER',
-      'THIS MENU: ESC OR CLICK TOP',
-      '',
-      '1997-STYLE LOW RESOLUTION UI',
+      'ESC : GAME MENU',
     ];
-    lines.forEach((line, index) => pixelText(line, 216, 82 + index * 16, 8, index === 0 ? '#fff36b' : '#ffffff', 'center'));
+    lines.forEach((line, index) => pixelText(line, 216, 88 + index * 19, 8, index < 2 ? '#f4e85c' : '#ffffff', 'center'));
+    pixelText('ESC BACK', 216, 247, 7, '#cfcfcf', 'center');
   }
 
   function drawModeSelector() {
     if (pikaVolley.state !== pikaVolley.menu || pikaVolley.frameCounter <= 70 || panel) return;
-    const entries = [
-      ['1P  CPU BATTLE', '1p'],
-      ['2P  LOCAL BATTLE', '2p'],
-    ];
-    entries.forEach(([label], index) => {
-      const y = 186 + index * 22;
+    const entries = ['1P  CPU', '2P  LOCAL'];
+    entries.forEach((label, index) => {
+      const y = 188 + index * 22;
       if (modeRow === index) {
-        ctx.fillStyle = 'rgba(0,0,0,0.55)';
-        ctx.fillRect(132, y - 3, 168, 16);
+        ctx.fillStyle = 'rgba(0,0,0,0.52)';
+        ctx.fillRect(144, y - 3, 144, 16);
       }
-      pixelText(`${modeRow === index ? '▶' : ' '} ${label}`, 216, y, 9, modeRow === index ? '#fff36b' : '#ffffff', 'center');
+      pixelText(`${modeRow === index ? '>' : ' '} ${label}`, 216, y, 9, modeRow === index ? '#f4e85c' : '#ffffff', 'center');
     });
-    pixelText('UP/DOWN SELECT · Z/ENTER START', 216, 238, 7, '#fff36b', 'center');
+    pixelText('UP/DOWN  Z/ENTER START', 216, 238, 7, '#f4e85c', 'center');
+    pixelText('K KEY  O OPTION  H HELP', 216, 253, 7, '#ffffff', 'center');
   }
 
   function draw() {
+    uiCanvas.dataset.panel = panel || 'none';
+    uiCanvas.dataset.titleSelection = modeRow === 0 ? '1p' : '2p';
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
-    drawTopBar();
     drawModeSelector();
-    if (panel === 'game') drawGamePanel();
+    if (panel === 'pause') drawPausePanel();
     if (panel === 'keys') drawKeyPanel();
     if (panel === 'options') drawOptionsPanel();
     if (panel === 'about') drawAboutPanel();
   }
 
-  function setPanel(next) {
-    panel = panel === next ? null : next;
+  function openPanel(next, previous = panel) {
+    returnPanel = previous;
+    panel = next;
     row = 0;
     capture = null;
     message = '';
-    pikaVolley.paused = !!panel;
+    pikaVolley.paused = true;
   }
 
-  function activateGameItem() {
-    if (row === 0) setPanel('game');
+  function closePanel() {
+    panel = null;
+    row = 0;
+    capture = null;
+    message = '';
+    returnPanel = null;
+    pikaVolley.paused = false;
+  }
+
+  function backPanel() {
+    if (returnPanel) {
+      const previous = returnPanel;
+      returnPanel = null;
+      panel = previous;
+      row = 0;
+      capture = null;
+      message = '';
+      pikaVolley.paused = true;
+      return;
+    }
+    closePanel();
+  }
+
+  function goToTitle() {
+    delete document.body.dataset.gameMode;
+    pikaVolley.frameCounter = 0;
+    pikaVolley.noInputFrameCounter = 0;
+    pikaVolley.slowMotionFramesLeft = 0;
+    pikaVolley.slowMotionNumOfSkippedFrames = 0;
+    pikaVolley.view.intro.visible = false;
+    pikaVolley.view.game.visible = false;
+    pikaVolley.view.fadeInOut.visible = false;
+    pikaVolley.view.menu.visible = false;
+    pikaVolley.audio.sounds.bgm.stop();
+    pikaVolley.state = pikaVolley.menu;
+    modeRow = 0;
+    closePanel();
+  }
+
+  function activatePauseItem() {
+    if (row === 0) {
+      closePanel();
+      return;
+    }
     if (row === 1) {
-      document.getElementById('pause-btn')?.click();
-      panel = null;
+      const mode = document.body.dataset.gameMode === '2p' ? '2p' : '1p';
+      pikaVolley.startSelectedMode(mode);
+      closePanel();
+      return;
     }
     if (row === 2) {
-      document.getElementById('restart-btn')?.click();
-      panel = null;
-      pikaVolley.paused = false;
+      openPanel('keys', 'pause');
+      return;
+    }
+    if (row === 3) {
+      openPanel('options', 'pause');
+      return;
+    }
+    if (row === 4) {
+      openPanel('about', 'pause');
+      return;
+    }
+    if (row === 5) {
+      goToTitle();
     }
   }
 
@@ -249,10 +299,19 @@ export function setUpRetroCanvasUI(pikaVolley, ticker) {
     document.getElementById(ids[index])?.click();
   }
 
+  function isTitleReady() {
+    return pikaVolley.state === pikaVolley.menu && pikaVolley.frameCounter > 70;
+  }
+
   window.addEventListener('keydown', (event) => {
     if (capture) {
       event.preventDefault();
       event.stopImmediatePropagation();
+      if (event.code === 'Escape') {
+        capture = null;
+        message = 'CANCELLED';
+        return;
+      }
       const bindings = pikaVolley.getSavedKeyboardBindings();
       const duplicate = Object.entries(bindings).some(([player, playerBindings]) =>
         Object.entries(playerBindings).some(([action, code]) => code === event.code && !(player === capture.player && action === capture.action))
@@ -269,52 +328,101 @@ export function setUpRetroCanvasUI(pikaVolley, ticker) {
       return;
     }
 
-    if (!panel && pikaVolley.state === pikaVolley.menu && pikaVolley.frameCounter > 70) {
-      if (event.code === 'ArrowUp' || event.code === 'ArrowDown') {
+    if (!panel && isTitleReady()) {
+      if (event.code === 'ArrowUp') {
         event.preventDefault();
-        modeRow = event.code === 'ArrowUp' ? (modeRow + 1) % 2 : (modeRow + 1) % 2;
+        event.stopImmediatePropagation();
+        modeRow = (modeRow - 1 + 2) % 2;
+        return;
       }
-      if (['KeyZ', 'Enter'].includes(event.code)) {
+      if (event.code === 'ArrowDown') {
         event.preventDefault();
+        event.stopImmediatePropagation();
+        modeRow = (modeRow + 1) % 2;
+        return;
+      }
+      if (event.code === 'KeyZ' || event.code === 'Enter') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
         pikaVolley.startSelectedMode(modeRow === 0 ? '1p' : '2p');
+        return;
       }
+      if (event.code === 'KeyK') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        openPanel('keys', null);
+        return;
+      }
+      if (event.code === 'KeyO') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        openPanel('options', null);
+        return;
+      }
+      if (event.code === 'KeyH') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        openPanel('about', null);
+        return;
+      }
+    }
+
+    if (!panel && event.code === 'Escape') {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      openPanel('pause', null);
       return;
     }
 
     if (!panel) return;
+
     if (event.code === 'Escape') {
       event.preventDefault();
-      panel = null;
-      pikaVolley.paused = false;
+      event.stopImmediatePropagation();
+      backPanel();
       return;
     }
-    const maxRows = panel === 'keys' ? 10 : panel === 'options' ? optionRows.length : panel === 'game' ? 3 : 1;
+
+    const maxRows = panel === 'keys' ? 10 : panel === 'options' ? optionRows.length : panel === 'pause' ? 6 : 1;
     if (event.code === 'ArrowUp') {
       event.preventDefault();
+      event.stopImmediatePropagation();
       row = (row - 1 + maxRows) % maxRows;
+      return;
     }
     if (event.code === 'ArrowDown') {
       event.preventDefault();
+      event.stopImmediatePropagation();
       row = (row + 1) % maxRows;
+      return;
     }
     if (panel === 'options' && event.code === 'ArrowLeft') {
       event.preventDefault();
+      event.stopImmediatePropagation();
       cycleOption(-1);
+      return;
     }
     if (panel === 'options' && event.code === 'ArrowRight') {
       event.preventDefault();
+      event.stopImmediatePropagation();
       cycleOption(1);
+      return;
     }
-    if (panel === 'game' && ['Enter', 'KeyZ'].includes(event.code)) {
+    if (panel === 'pause' && (event.code === 'Enter' || event.code === 'KeyZ')) {
       event.preventDefault();
-      activateGameItem();
+      event.stopImmediatePropagation();
+      activatePauseItem();
+      return;
     }
-    if (panel === 'keys' && ['Enter', 'KeyZ'].includes(event.code)) {
+    if (panel === 'keys' && (event.code === 'Enter' || event.code === 'KeyZ')) {
       event.preventDefault();
+      event.stopImmediatePropagation();
       startCapture();
+      return;
     }
     if (panel === 'keys' && event.code === 'KeyR') {
       event.preventDefault();
+      event.stopImmediatePropagation();
       const defaults = pikaVolley.getDefaultKeyboardBindings();
       localStorage.setItem('pikachu-volleyball-controls-v1', JSON.stringify(defaults));
       pikaVolley.setKeyboardBindings(defaults);
@@ -324,21 +432,24 @@ export function setUpRetroCanvasUI(pikaVolley, ticker) {
 
   uiCanvas.addEventListener('pointerdown', (event) => {
     const rect = uiCanvas.getBoundingClientRect();
-    const x = (event.clientX - rect.left) * WIDTH / rect.width;
-    const y = (event.clientY - rect.top) * HEIGHT / rect.height;
-    const tab = tabs.find((item) => x >= item.x && x <= item.x + item.w && y >= 3 && y <= 17);
-    if (tab) {
-      setPanel(tab.id);
-      return;
-    }
-    if (!panel && pikaVolley.state === pikaVolley.menu && pikaVolley.frameCounter > 70) {
-      if (y >= 178 && y < 207) {
+    const x = ((event.clientX - rect.left) * WIDTH) / rect.width;
+    const y = ((event.clientY - rect.top) * HEIGHT) / rect.height;
+
+    if (!panel && isTitleReady()) {
+      if (x >= 132 && x <= 300 && y >= 178 && y < 207) {
         modeRow = 0;
         pikaVolley.startSelectedMode('1p');
-      } else if (y >= 207 && y < 232) {
+      } else if (x >= 132 && x <= 300 && y >= 207 && y < 232) {
         modeRow = 1;
         pikaVolley.startSelectedMode('2p');
       }
+      return;
+    }
+
+    if (panel === 'pause' && x >= 93 && x <= 339 && y >= 69 && y <= 238) {
+      const index = Math.max(0, Math.min(5, Math.floor((y - 69) / 27)));
+      row = index;
+      activatePauseItem();
     }
   });
 

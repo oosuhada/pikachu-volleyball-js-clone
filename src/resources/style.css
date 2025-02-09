@@ -2,9 +2,8 @@
 #menu-bar,
 #retro-settings-overlay,
 .if-embedded-in-other-website,
-.fade-in-box.about,
-.fade-in-box.notice,
-.fade-in-box.update {
+.fade-in-box,
+#retro-menu-hints {
   display: none !important;
 }
 

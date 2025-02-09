@@ -159,6 +159,7 @@ export class PikachuVolleyball {
   }
 
   startSelectedMode(mode) {
+    document.body.dataset.gameMode = mode;
     this.frameCounter = 0;
     this.noInputFrameCounter = 0;
     this.view.intro.visible = false;
