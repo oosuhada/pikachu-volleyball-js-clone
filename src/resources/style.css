@@ -456,8 +456,7 @@ a:hover,
 a:active {
   color: var(--link-hover-color);
 }
-#flex-container,
-#update-history-container {
+#flex-container {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -470,16 +469,6 @@ a:active {
   margin-right: auto;
   padding-top: 8px;
   padding-bottom: 8px;
-}
-#update-history-container {
-  justify-content: center;
-  align-items: stretch;
-  height: auto;
-  font-size: var(--font-size);
-  padding-left: var(--font-size);
-  padding-right: var(--font-size);
-  overflow: visible;
-  text-align: left;
 }
 #menu-bar {
   display: flex;
@@ -682,8 +671,7 @@ p.super-ai-edition,
 p.original-by,
 p.reverse-engineered-by,
 p.source-code-on,
-p.release-date,
-p.update-history-on {
+p.release-date {
   font-size: 0.8em;
   line-height: 150%;
 }
@@ -694,10 +682,6 @@ p.super-ai-edition {
   margin-top: 0.1em;
 }
 p.release-date {
-  margin-block-end: 0;
-}
-p.update-history-on {
-  margin-block-start: 0;
   margin-block-end: 0;
 }
 span.no-wrap {
@@ -778,9 +762,6 @@ div.limit-width {
   max-width: 864px;
   margin-left: auto;
   margin-right: auto;
-}
-#update-history-container h1 {
-  font-size: calc(1.5 * var(--font-size));
 }
 div.indent-minus {
   text-indent: calc(-5.4 * var(--font-size));

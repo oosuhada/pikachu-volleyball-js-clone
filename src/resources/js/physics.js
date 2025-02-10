@@ -132,6 +132,8 @@ class Player {
     this.isPlayer2 = isPlayer2; // 0xA0
     /** @type {boolean} Is controlled by computer? */
     this.isComputer = isComputer; // 0xA4
+    /** @type {'easy'|'normal'|'hard'} CPU decision difficulty */
+    this.computerDifficulty = 'normal';
     this.initializeForNewRound();
 
     /** @type {number} -1: left, 0: no diving, 1: right */
@@ -210,7 +212,13 @@ class Player {
      *
      * @type {number} 0, 1, 2, 3 or 4
      */
-    this.computerBoldness = rand() % 5; // 0xD8  // initialized to (_rand() % 5)
+    if (this.computerDifficulty === 'easy') {
+      this.computerBoldness = rand() % 2;
+    } else if (this.computerDifficulty === 'hard') {
+      this.computerBoldness = 4;
+    } else {
+      this.computerBoldness = rand() % 5; // 0xD8  // initialized to (_rand() % 5)
+    }
   }
 }
 
@@ -804,6 +812,13 @@ function letComputerDecideUserInput(player, ball, theOtherPlayer, userInput) {
   userInput.xDirection = 0;
   userInput.yDirection = 0;
   userInput.powerHit = 0;
+
+  // EASY CPU deliberately hesitates on some frames so that beginners get
+  // more time to recover. NORMAL keeps the original behaviour, while HARD
+  // uses the maximum boldness value set when the round is initialized.
+  if (player.computerDifficulty === 'easy' && rand() % 6 === 0) {
+    return;
+  }
 
   let virtualExpectedLandingPointX = ball.expectedLandingPointX;
   if (

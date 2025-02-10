@@ -95,6 +95,9 @@ export class PikachuVolleyball {
     /** @type {boolean} true: stereo, false: mono */
     this.isStereoSound = true;
 
+    /** @type {'easy'|'normal'|'hard'} CPU opponent difficulty */
+    this.cpuDifficulty = 'normal';
+
     /** @type {boolean} true: practice mode on, false: practice mode off */
     this._isPracticeMode = false;
 
@@ -168,8 +171,30 @@ export class PikachuVolleyball {
     this.view.fadeInOut.visible = true;
     this.physics.player1.isComputer = false;
     this.physics.player2.isComputer = mode === '1p';
+    this.applyCpuDifficulty();
     this.selectedWithWho = mode === '2p' ? 1 : 0;
     this.state = this.afterMenuSelection;
+  }
+
+  setCpuDifficulty(difficulty) {
+    const next = ['easy', 'normal', 'hard'].includes(difficulty)
+      ? difficulty
+      : 'normal';
+    this.cpuDifficulty = next;
+    this.physics.player1.computerDifficulty = next;
+    this.physics.player2.computerDifficulty = next;
+    this.applyCpuDifficulty();
+  }
+
+  applyCpuDifficulty() {
+    [this.physics.player1, this.physics.player2].forEach((player) => {
+      player.computerDifficulty = this.cpuDifficulty;
+      if (this.cpuDifficulty === 'easy') {
+        player.computerBoldness = Math.min(player.computerBoldness, 1);
+      } else if (this.cpuDifficulty === 'hard') {
+        player.computerBoldness = 4;
+      }
+    });
   }
 
   /**
@@ -360,6 +385,7 @@ export class PikachuVolleyball {
 
       this.physics.player1.initializeForNewRound();
       this.physics.player2.initializeForNewRound();
+      this.applyCpuDifficulty();
       this.physics.ball.initializeForNewRound(this.isPlayer2Serve);
       this.view.game.drawPlayersAndBall(this.physics);
 
@@ -491,6 +517,7 @@ export class PikachuVolleyball {
 
       this.physics.player1.initializeForNewRound();
       this.physics.player2.initializeForNewRound();
+      this.applyCpuDifficulty();
       this.physics.ball.initializeForNewRound(this.isPlayer2Serve);
       this.view.game.drawPlayersAndBall(this.physics);
     }

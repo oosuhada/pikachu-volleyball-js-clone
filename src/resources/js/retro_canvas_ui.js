@@ -54,12 +54,19 @@ export function setUpRetroCanvasUI(pikaVolley, ticker) {
   let capture = null;
   let message = '';
   let returnPanel = null;
+  const difficultyValues = ['easy', 'normal', 'hard'];
+  let difficultyIndex = Math.max(
+    0,
+    difficultyValues.indexOf(localStorage.getItem('pikachu-volleyball-cpu-difficulty') || 'normal')
+  );
+  pikaVolley.setCpuDifficulty(difficultyValues[difficultyIndex]);
 
   const optionRows = [
     ['GRAPHIC', ['graphic-sharp-btn', 'graphic-soft-btn'], ['SHARP', 'SOFT']],
     ['BGM', ['bgm-on-btn', 'bgm-off-btn'], ['ON', 'OFF']],
     ['SFX', ['stereo-btn', 'mono-btn', 'sfx-off-btn'], ['STEREO', 'MONO', 'OFF']],
     ['SPEED', ['slow-speed-btn', 'medium-speed-btn', 'fast-speed-btn'], ['SLOW', 'NORMAL', 'FAST']],
+    ['CPU LEVEL', null, ['EASY', 'NORMAL', 'HARD']],
     ['SCORE', ['winning-score-5-btn', 'winning-score-10-btn', 'winning-score-15-btn'], ['5', '10', '15']],
     ['PRACTICE', ['practice-mode-on-btn', 'practice-mode-off-btn'], ['ON', 'OFF']],
   ];
@@ -153,13 +160,16 @@ export function setUpRetroCanvasUI(pikaVolley, ticker) {
   function drawOptionsPanel() {
     panelFrame('OPTION');
     optionRows.forEach(([label, ids, labels], index) => {
-      const y = 79 + index * 27;
+      const y = 75 + index * 24;
       if (row === index) {
         ctx.fillStyle = '#f4e85c';
         ctx.fillRect(74, y - 4, 284, 18);
       }
       pixelText(`${row === index ? '>' : ' '} ${label}`, 86, y, 8, row === index ? '#081008' : '#ffffff');
-      pixelText(selectedOptionLabel(ids, labels), 346, y, 8, row === index ? '#081008' : '#f4e85c', 'right');
+      const value = label === 'CPU LEVEL'
+        ? labels[difficultyIndex]
+        : selectedOptionLabel(ids, labels);
+      pixelText(value, 346, y, 8, row === index ? '#081008' : '#f4e85c', 'right');
     });
     pixelText('LEFT/RIGHT CHANGE  ESC BACK', 216, 247, 7, '#cfcfcf', 'center');
   }
@@ -191,14 +201,24 @@ export function setUpRetroCanvasUI(pikaVolley, ticker) {
       pixelText(`${modeRow === index ? '>' : ' '} ${label}`, 216, y, 9, modeRow === index ? '#f4e85c' : '#ffffff', 'center');
     });
     pixelText('UP/DOWN  Z/ENTER START', 216, 238, 7, '#f4e85c', 'center');
-    pixelText('K KEY  O OPTION  H HELP', 216, 253, 7, '#ffffff', 'center');
+    pixelText('PRESS ESC : MENU', 216, 253, 7, '#ffffff', 'center');
+  }
+
+  function drawGameMenuHint() {
+    if (!document.body.dataset.gameMode || panel || pikaVolley.state === pikaVolley.menu) return;
+    ctx.fillStyle = 'rgba(0,0,0,0.46)';
+    ctx.fillRect(337, 286, 89, 13);
+    pixelText('ESC : MENU', 421, 289, 7, '#f4e85c', 'right');
   }
 
   function draw() {
     uiCanvas.dataset.panel = panel || 'none';
     uiCanvas.dataset.titleSelection = modeRow === 0 ? '1p' : '2p';
+    uiCanvas.dataset.cpuDifficulty = difficultyValues[difficultyIndex];
+    uiCanvas.dataset.gameSpeed = String(pikaVolley.normalFPS);
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
     drawModeSelector();
+    drawGameMenuHint();
     if (panel === 'pause') drawPausePanel();
     if (panel === 'keys') drawKeyPanel();
     if (panel === 'options') drawOptionsPanel();
@@ -292,6 +312,14 @@ export function setUpRetroCanvasUI(pikaVolley, ticker) {
   }
 
   function cycleOption(direction) {
+    if (optionRows[row][0] === 'CPU LEVEL') {
+      difficultyIndex = (difficultyIndex + direction + difficultyValues.length) % difficultyValues.length;
+      const difficulty = difficultyValues[difficultyIndex];
+      localStorage.setItem('pikachu-volleyball-cpu-difficulty', difficulty);
+      pikaVolley.setCpuDifficulty(difficulty);
+      message = `CPU LEVEL ${difficulty.toUpperCase()}`;
+      return;
+    }
     const ids = optionRows[row][1];
     let index = ids.findIndex((id) => document.getElementById(id)?.classList.contains('selected'));
     if (index < 0) index = 0;
