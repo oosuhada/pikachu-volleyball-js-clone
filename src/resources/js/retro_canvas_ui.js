@@ -45,6 +45,22 @@ export function setUpRetroCanvasUI(pikaVolley, ticker) {
   container.appendChild(uiCanvas);
   fitCanvasToGame(uiCanvas, gameCanvas);
 
+  const mobileControls = document.createElement('div');
+  mobileControls.id = 'mobile-game-controls';
+  mobileControls.setAttribute('aria-label', 'Mobile game controls');
+  mobileControls.innerHTML = `
+    <div class="mobile-dpad" aria-label="Direction pad">
+      <button type="button" data-action="up" class="mobile-key up" aria-label="Jump or up">▲</button>
+      <button type="button" data-action="left" class="mobile-key left" aria-label="Move left">◀</button>
+      <button type="button" data-action="down" class="mobile-key down" aria-label="Down">▼</button>
+      <button type="button" data-action="right" class="mobile-key right" aria-label="Move right">▶</button>
+    </div>
+    <div class="mobile-actions">
+      <button type="button" data-action="menu" class="mobile-key menu" aria-label="Menu">MENU</button>
+      <button type="button" data-action="smash" class="mobile-key smash" aria-label="Smash or confirm">SMASH</button>
+    </div>`;
+  container.appendChild(mobileControls);
+
   const ctx = uiCanvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
 
@@ -333,6 +349,55 @@ export function setUpRetroCanvasUI(pikaVolley, ticker) {
   function isTitleReady() {
     return pikaVolley.state === pikaVolley.menu && pikaVolley.frameCounter > 70;
   }
+
+  function dispatchSyntheticKey(type, code) {
+    const event = new KeyboardEvent(type, {
+      code,
+      key: code,
+      bubbles: true,
+      cancelable: true,
+    });
+    window.dispatchEvent(event);
+  }
+
+  function mobileCodeFor(action) {
+    const navigatingUI = Boolean(panel) || isTitleReady();
+    if (action === 'menu') return 'Escape';
+    if (navigatingUI) {
+      if (action === 'up') return 'ArrowUp';
+      if (action === 'down') return 'ArrowDown';
+      if (action === 'left') return 'ArrowLeft';
+      if (action === 'right') return 'ArrowRight';
+      if (action === 'smash') return 'KeyZ';
+    }
+    const bindings = pikaVolley.getSavedKeyboardBindings().player1;
+    if (action === 'smash') return bindings.powerHit;
+    return bindings[action] || null;
+  }
+
+  mobileControls.querySelectorAll('[data-action]').forEach((button) => {
+    let activeCode = null;
+    button.addEventListener('pointerdown', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      button.setPointerCapture?.(event.pointerId);
+      button.classList.add('pressed');
+      activeCode = mobileCodeFor(button.dataset.action);
+      if (activeCode) dispatchSyntheticKey('keydown', activeCode);
+    });
+    const release = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      button.classList.remove('pressed');
+      if (activeCode) dispatchSyntheticKey('keyup', activeCode);
+      activeCode = null;
+    };
+    button.addEventListener('pointerup', release);
+    button.addEventListener('pointercancel', release);
+    button.addEventListener('lostpointercapture', (event) => {
+      if (activeCode) release(event);
+    });
+  });
 
   window.addEventListener('keydown', (event) => {
     if (capture) {
