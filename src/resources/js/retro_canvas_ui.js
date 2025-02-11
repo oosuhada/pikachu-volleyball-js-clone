@@ -148,8 +148,10 @@ export function setUpRetroCanvasUI(pikaVolley, ticker) {
       );
     });
 
-    pixelText(capture ? 'PRESS NEW KEY...' : 'Z/ENTER CHANGE  R DEFAULT', 216, 234, 7, capture ? '#ff8a5c' : '#cfcfcf', 'center');
-    pixelText(message || 'ESC BACK', 216, 249, 7, message ? '#f4e85c' : '#cfcfcf', 'center');
+    pixelText('JUMP + SMASH : POWER HIT', 216, 219, 7, '#f4e85c', 'center');
+    pixelText('MOVE + SMASH : DIVE', 216, 230, 7, '#f4e85c', 'center');
+    pixelText(capture ? 'PRESS NEW KEY...' : 'Z/ENTER CHANGE  R DEFAULT', 216, 241, 7, capture ? '#ff8a5c' : '#cfcfcf', 'center');
+    pixelText(message || 'ESC BACK', 216, 252, 7, message ? '#f4e85c' : '#cfcfcf', 'center');
   }
 
   function selectedOptionLabel(ids, labels) {
@@ -180,12 +182,13 @@ export function setUpRetroCanvasUI(pikaVolley, ticker) {
       '1P VS CPU',
       '2P LOCAL',
       '',
-      'MOVE / JUMP / SMASH',
-      'KEYS CAN BE CHANGED IN MENU',
+      'JUMP + SMASH : POWER HIT',
+      'MOVE + SMASH : DIVE',
+      'SMASH DIRECTION FOLLOWS INPUT',
       '',
       'ESC : GAME MENU',
     ];
-    lines.forEach((line, index) => pixelText(line, 216, 88 + index * 19, 8, index < 2 ? '#f4e85c' : '#ffffff', 'center'));
+    lines.forEach((line, index) => pixelText(line, 216, 82 + index * 18, 8, index < 2 ? '#f4e85c' : '#ffffff', 'center'));
     pixelText('ESC BACK', 216, 247, 7, '#cfcfcf', 'center');
   }
 
