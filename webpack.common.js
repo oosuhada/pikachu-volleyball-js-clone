@@ -36,7 +36,7 @@ module.exports = {
       filename: 'index.html',
       assetPrefix: './',
       manifestPath: './manifest.json',
-      buildVersion: '1.0.13',
+      buildVersion: '1.0.14',
       chunks: [
         'runtime',
         'ko',

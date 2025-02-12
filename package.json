@@ -1,6 +1,6 @@
 {
   "name": "retro-pikachu-volleyball",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Pikachu Volleyball JavaScript browser clone with explicit 1P and local 2P modes",
   "private": true,
   "scripts": {

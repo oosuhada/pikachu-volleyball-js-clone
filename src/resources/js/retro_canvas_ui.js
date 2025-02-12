@@ -61,6 +61,29 @@ export function setUpRetroCanvasUI(pikaVolley, ticker) {
     </div>`;
   container.appendChild(mobileControls);
 
+  const isTouchDevice = window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+  let lastTouchEndAt = 0;
+
+  function preventBrowserGesture(event) {
+    if (!isTouchDevice) return;
+    event.preventDefault();
+  }
+
+  function preventDoubleTapZoom(event) {
+    if (!isTouchDevice) return;
+    const now = Date.now();
+    if (now - lastTouchEndAt <= 320) {
+      event.preventDefault();
+    }
+    lastTouchEndAt = now;
+  }
+
+  document.addEventListener('gesturestart', preventBrowserGesture, { passive: false });
+  document.addEventListener('gesturechange', preventBrowserGesture, { passive: false });
+  document.addEventListener('gestureend', preventBrowserGesture, { passive: false });
+  document.addEventListener('touchmove', preventBrowserGesture, { passive: false });
+  document.addEventListener('touchend', preventDoubleTapZoom, { passive: false });
+
   const ctx = uiCanvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
 
@@ -394,6 +417,7 @@ export function setUpRetroCanvasUI(pikaVolley, ticker) {
     };
     button.addEventListener('pointerup', release);
     button.addEventListener('pointercancel', release);
+    button.addEventListener('contextmenu', (event) => event.preventDefault());
     button.addEventListener('lostpointercapture', (event) => {
       if (activeCode) release(event);
     });
