@@ -172,16 +172,16 @@
   }
 
   #flex-container {
-    width: var(--canvas-width);
-    height: var(--canvas-height);
-    min-height: 0;
-    padding: 0;
+    width: var(--canvas-width) !important;
+    height: var(--canvas-height) !important;
+    min-height: 0 !important;
+    padding: 0 !important;
   }
 
   #game-canvas-container {
-    width: var(--canvas-width);
-    height: var(--canvas-height);
-    overflow: visible;
+    width: var(--canvas-width) !important;
+    height: var(--canvas-height) !important;
+    overflow: visible !important;
     touch-action: none;
   }
 
@@ -263,7 +263,7 @@
     position: fixed;
     top: 50%;
     left: 50%;
-    margin: 0;
+    margin: 0 !important;
     transform: translate(-50%, -50%) rotate(90deg);
     transform-origin: center;
   }
